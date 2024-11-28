@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGREEN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f0f8f5;
+            color: #333;
+        }
+
+        header {
+            background-color: #32a852;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .plant-image {
+            max-width: 200px;
+            margin: 20px auto;
+        }
+
+        .form-container {
+            margin-top: 20px;
+        }
+
+        input {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #32a852;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2c9448;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #qr-reader {
+            margin: 20px auto;
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IGREEN</h1>
+    </header>
+    <div class="container">
+        <img src="https://via.placeholder.com/200" alt="Planta" class="plant-image">
+        <p>Hola, nosotros queremos invitarte a reciclar. Para ello, debes escanear un código QR.</p>
+        <div class="form-container" id="login-container">
+            <input type="email" id="email" placeholder="Correo electrónico">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="login()">Iniciar Sesión</button>
+            <p>¿No tienes una cuenta? <button onclick="showRegister()">Regístrate</button></p>
+        </div>
+
+        <div class="form-container hidden" id="register-container">
+            <input type="email" id="register-email" placeholder="Correo electrónico">
+            <input type="password" id="register-password" placeholder="Contraseña">
+            <button onclick="register()">Crear Cuenta</button>
+        </div>
+
+        <div class="hidden" id="scan-container">
+            <button onclick="startScanning()">Comencemos</button>
+            <p id="points">Puntos: 0</p>
+        </div>
+
+        <div class="hidden" id="qr-reader"></div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script>
+        let points = 0;
+
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (email && password) {
+                alert("Sesión iniciada correctamente");
+                document.getElementById("login-container").classList.add("hidden");
+                document.getElementById("scan-container").classList.remove("hidden");
+            } else {
+                alert("Por favor ingresa tus datos");
+            }
+        }
+
+        function showRegister() {
+            document.getElementById("login-container").classList.add("hidden");
+            document.getElementById("register-container").classList.remove("hidden");
+        }
+
+        function register() {
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            
+
+            if (email && password) {
+                alert("Registro exitoso, ahora inicia sesión");
+                document.getElementById("register-container").classList.add("hidden");
+                document.getElementById("login-container").classList.remove("hidden");
+            } else {
+                alert("Por favor completa todos los campos");
+            }
+        }
+
+        function startScanning() {
+            document.getElementById("scan-container").classList.add("hidden");
+            const qrReader = document.getElementById("qr-reader");
+            qrReader.classList.remove("hidden");
+
+            const html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, // Usa la cámara trasera
+                {
+                    fps: 10, // Velocidad de cuadros
+                    qrbox: { width: 250, height: 250 } // Área de escaneo
+                },
+                qrCodeMessage => {
+                    // Manejo del código QR escaneado
+                    points += 10;
+                    document.getElementById("points").innerText = `Puntos: ${points}`;
+                    alert(`¡Código escaneado con éxito! Código: ${qrCodeMessage}`);
+                    html5QrCode.stop();
+                    qrReader.classList.add("hidden");
+                    document.getElementById("scan-container").classList.remove("hidden");
+                },
+                errorMessage => {
+                    console.warn(`Error de escaneo: ${errorMessage}`);
+                }
+            ).catch(err => {
+                console.error("Error al iniciar la cámara", err);
+                alert("Hubo un problema al acceder a la cámara. Asegúrate de haber dado permisos.");
+                qrReader.classList.add("hidden");
+                document.getElementById("scan-container").classList.remove("hidden");
+            });
+        }
+    </script>
+</body>
+</html>
